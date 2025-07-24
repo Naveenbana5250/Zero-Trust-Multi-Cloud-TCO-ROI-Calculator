@@ -8,35 +8,53 @@ architecture across AWS and Azure cloud environments.
 
 # Key Features
 Multi-Cloud Cost Modeling: Compare AWS vs. Azure implementation costs
+
 Financial Projections: 3-year TCO and ROI calculations
+
 Risk Quantification: Annualized Loss Expectancy (ALE) analysis
+
 Automation Impact: Calculate operational efficiency gains
+
 Scenario Analysis: Test conservative/optimistic projections
+
 Interactive Dashboards: Visualize cost breakdowns and benefits
 
 # Technology Stack
 Frontend: HTML5, CSS3, JavaScript (ES6+)
+
 Data Visualization: Chart.js v3.7
+
 Responsive Design: CSS Grid/Flexbox
+
 Browser Support: Chrome, Firefox, Edge, Safari
 
 # Installation
 Option 1: Local Usage
+
 Download repository
+
 Open index.html in any modern browser
 
 # Usage
 Input Parameters:
+
 1.Set organization profile (employees, cloud workloads)
+
 2.Configure current security baseline
+
 3.Define target state objectives
 
 # Run Analysis:
 Click "Calculate TCO & ROI"
+
 View results across multiple tabs
+
 Interpret Results:
+
 Review cost breakdowns
+
 Analyze benefit projections
+
 Evaluate ROI metrics
 
 # Support
