@@ -1,0 +1,1687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zero Trust Multi-Cloud TCO/ROI Financial Calculator</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #3498db;
+            flex-wrap: wrap;
+        }
+        
+        .tab {
+            padding: 12px 24px;
+            cursor: pointer;
+            background: #ecf0f1;
+            border: none;
+            margin-right: 5px;
+            border-radius: 10px 10px 0 0;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin-bottom: 5px;
+        }
+        
+        .tab.active {
+            background: #3498db;
+            color: white;
+        }
+        
+        .tab:hover:not(.active) {
+            background: #bdc3c7;
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 20px 0;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .section {
+            background: white;
+            margin: 20px 0;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-left: 5px solid #3498db;
+        }
+        
+        .section h2 {
+            color: #2980b9;
+            margin-top: 0;
+            font-size: 1.8em;
+        }
+        
+        .input-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .input-field {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .input-field label {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #34495e;
+        }
+        
+        .input-field input, .input-field select {
+            padding: 12px;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .input-field input:focus, .input-field select:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+        
+        .calculate-btn {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 20px auto;
+            display: block;
+            transition: transform 0.3s ease;
+        }
+        
+        .calculate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(52, 152, 219, 0.3);
+        }
+        
+        .results {
+            display: none;
+            margin-top: 30px;
+        }
+        
+        .metric-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 15px 0;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        
+        .metric-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .metric-label {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .chart-container {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            position: relative;
+            height: 400px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        
+        th {
+            background: #3498db;
+            color: white;
+            font-weight: bold;
+        }
+        
+        tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .positive {
+            color: #27ae60;
+            font-weight: bold;
+        }
+        
+        .negative {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        
+        .assumption-box {
+            background: #f8f9fa;
+            border-left: 4px solid #f39c12;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        
+        .roi-indicator {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .roi-excellent { background: #27ae60; color: white; }
+        .roi-good { background: #f39c12; color: white; }
+        .roi-poor { background: #e74c3c; color: white; }
+        
+        .disclaimer {
+            background: #ecf0f1;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 30px 0;
+            font-style: italic;
+            color: #7f8c8d;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .slider-container input[type="range"] {
+            flex-grow: 1;
+        }
+
+        .slider-value {
+            min-width: 40px;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛡️ Zero Trust Multi-Cloud TCO/ROI Financial Calculator</h1>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('assumptions')">📊 Assumptions & Inputs</button>
+            <button class="tab" onclick="showTab('costs')">💰 Cost Breakdown</button>
+            <button class="tab" onclick="showTab('benefits')">📈 Benefits & ROI</button>
+            <button class="tab" onclick="showTab('timeline')">📅 3-Year Timeline</button>
+            <button class="tab" onclick="showTab('scenarios')">🎯 Scenario Analysis</button>
+            <button class="tab" onclick="showTab('automation')">🤖 Automation Impact</button>
+        </div>
+
+        <!-- Assumptions Tab -->
+        <div id="assumptions" class="tab-content active">
+            <div class="section">
+                <h2>🏢 Organization Profile</h2>
+                <div class="input-group">
+                    <div class="input-field">
+                        <label>Organization Size (Employees)</label>
+                        <input type="number" id="employees" value="2500" onchange="calculateAll()">
+                    </div>
+                    <div class="input-field">
+                        <label>Cloud Workloads (Total VMs/Containers)</label>
+                        <input type="number" id="workloads" value="1200" onchange="calculateAll()">
+                    </div>
+                    <div class="input-field">
+                        <label>AWS/Azure Split</label>
+                        <div class="slider-container">
+                            <input type="range" id="cloudSplit" min="0" max="100" value="60" oninput="updateSplit(); calculateAll()">
+                            <span class="slider-value" id="awsPercent">60</span>%
+                            <span style="width: 30px; text-align: center;">/</span>
+                            <span class="slider-value" id="azurePercent">40</span>%
+                        </div>
+                    </div>
+                    <div class="input-field">
+                        <label>Average Employee Salary (USD)</label>
+                        <input type="number" id="avgSalary" value="85000" onchange="calculateAll()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>⚡ Current State Assessment</h2>
+                <div class="input-group">
+                    <div class="input-field">
+                        <label>Current Security Incidents/Year</label>
+                        <input type="number" id="currentIncidents" value="24" onchange="calculateAll()">
+                    </div>
+                    <div class="input-field">
+                        <label>Average Incident Cost (USD)</label>
+                        <input type="number" id="incidentCost" value="175000" onchange="calculateAll()">
+                    </div>
+                    <div class="input-field">
+                        <label>Current Security Team Size</label>
+                        <input type="number" id="securityTeam" value="12" onchange="calculateAll()">
+                    </div>
+                    <div class="input-field">
+                        <label>Manual Tasks Hours/Week</label>
+                        <input type="number" id="manualHours" value="320" onchange="calculateAll()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🎯 Zero Trust Target State</h2>
+                <div class="input-group">
+                    <div class="input-field">
+                        <label>Expected Incident Reduction (%)</label>
+                        <input type="number" id="incidentReduction" value="65" min="0" max="100" onchange="calculateAll()">
+                    </div>
+                    <div class="input-field">
+                        <label>Automation Efficiency Gain (%)</label>
+                        <input type="number" id="automationGain" value="70" min="0" max="100" onchange="calculateAll()">
+                    </div>
+                    <div class="input-field">
+                        <label>Compliance Effort Reduction (%)</label>
+                        <input type="number" id="complianceReduction" value="45" min="0" max="100" onchange="calculateAll()">
+                    </div>
+                    <div class="input-field">
+                        <label>Mean Time to Response Improvement (%)</label>
+                        <input type="number" id="mttrImprovement" value="80" min="0" max="100" onchange="calculateAll()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>📉 Risk Model Parameters</h2>
+                <div class="input-group">
+                    <div class="input-field">
+                        <label>Current ALE (Annual Loss Expectancy)</label>
+                        <input type="number" id="aleBefore" value="4200000" onchange="calculateAll()">
+                    </div>
+                    <div class="input-field">
+                        <label>Post-Implementation ALE Target</label>
+                        <input type="number" id="aleAfter" value="1470000" onchange="calculateAll()">
+                    </div>
+                    <div class="input-field">
+                        <label>Major Breach Avoidance Probability (%)</label>
+                        <input type="number" id="breachAvoidance" value="75" min="0" max="100" onchange="calculateAll()">
+                    </div>
+                    <div class="input-field">
+                        <label>Major Breach Cost (USD)</label>
+                        <input type="number" id="majorBreachCost" value="2850000" onchange="calculateAll()">
+                    </div>
+                </div>
+            </div>
+
+            <button class="calculate-btn" onclick="calculateAll()">🔄 Calculate TCO & ROI</button>
+        </div>
+
+        <!-- Costs Tab -->
+        <div id="costs" class="tab-content">
+            <div class="section">
+                <h2>💸 Capital Expenditures (CapEx)</h2>
+                <table id="capexTable">
+                    <thead>
+                        <tr>
+                            <th>Component</th>
+                            <th>Vendor/Service</th>
+                            <th>Year 1</th>
+                            <th>Year 2</th>
+                            <th>Year 3</th>
+                            <th>3-Year Total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="capexBody"></tbody>
+                </table>
+            </div>
+
+            <div class="section">
+                <h2>🔄 Operational Expenditures (OpEx)</h2>
+                <table id="opexTable">
+                    <thead>
+                        <tr>
+                            <th>Component</th>
+                            <th>Type</th>
+                            <th>Year 1</th>
+                            <th>Year 2</th>
+                            <th>Year 3</th>
+                            <th>3-Year Total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="opexBody"></tbody>
+                </table>
+            </div>
+
+            <div class="section">
+                <h2>📊 Cost Summary</h2>
+                <div class="input-group">
+                    <div class="metric-card">
+                        <div class="metric-value" id="totalCapex">$0</div>
+                        <div class="metric-label">Total CapEx (3 Years)</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="totalOpex">$0</div>
+                        <div class="metric-label">Total OpEx (3 Years)</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="totalTco">$0</div>
+                        <div class="metric-label">Total TCO (3 Years)</div>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="costBreakdownChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Benefits Tab -->
+        <div id="benefits" class="tab-content">
+            <div class="section">
+                <h2>💰 Financial Benefits</h2>
+                <table id="benefitsTable">
+                    <thead>
+                        <tr>
+                            <th>Benefit Category</th>
+                            <th>Year 1</th>
+                            <th>Year 2</th>
+                            <th>Year 3</th>
+                            <th>3-Year Total</th>
+                            <th>NPV (10% Discount)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="benefitsBody"></tbody>
+                </table>
+            </div>
+
+            <div class="section">
+                <h2>📈 ROI Metrics</h2>
+                <div class="input-group">
+                    <div class="metric-card">
+                        <div class="metric-value" id="totalBenefits">$0</div>
+                        <div class="metric-label">Total Benefits (3 Years)</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="netBenefit">$0</div>
+                        <div class="metric-label">Net Benefit</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="roiPercentage">0%</div>
+                        <div class="metric-label">ROI Percentage</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="paybackPeriod">0</div>
+                        <div class="metric-label">Payback Period (Months)</div>
+                    </div>
+                </div>
+                
+                <div class="roi-indicator" id="roiIndicator">Calculating...</div>
+            </div>
+
+            <div class="section">
+                <h2>⚖️ Risk Reduction Analysis</h2>
+                <div class="chart-container">
+                    <canvas id="riskChart"></canvas>
+                </div>
+                <div class="assumption-box">
+                    <strong>Risk Model Integration:</strong> This calculator integrates with Himadri's risk assessment model, using ALE (Annualized Loss Expectancy) values to quantify risk reduction benefits. The current model assumes a baseline ALE of $4.2M reduced to $1.47M post-implementation.
+                </div>
+            </div>
+        </div>
+
+        <!-- Timeline Tab -->
+        <div id="timeline" class="tab-content">
+            <div class="section">
+                <h2>📅 3-Year Implementation Timeline</h2>
+                <div class="chart-container">
+                    <canvas id="timelineChart"></canvas>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>💸 Cash Flow Analysis</h2>
+                <table id="cashflowTable">
+                    <thead>
+                        <tr>
+                            <th>Period</th>
+                            <th>Initial Investment</th>
+                            <th>Ongoing Costs</th>
+                            <th>Benefits Realized</th>
+                            <th>Net Cash Flow</th>
+                            <th>Cumulative Cash Flow</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cashflowBody"></tbody>
+                </table>
+            </div>
+
+            <div class="section">
+                <h2>🎯 Implementation Milestones</h2>
+                <div id="milestones">
+                    <div class="assumption-box">
+                        <strong>Phase 1 (Months 1-6):</strong> AWS Zero Trust Foundation - IAM Identity Center, GuardDuty, Security Hub, Config Rules
+                        <br><strong>Expected Benefits:</strong> 15% incident reduction, basic automation
+                    </div>
+                    <div class="assumption-box">
+                        <strong>Phase 2 (Months 7-12):</strong> Azure Zero Trust Integration - Azure AD, Defender for Cloud, Sentinel, Policy Engine
+                        <br><strong>Expected Benefits:</strong> 35% incident reduction, cross-cloud visibility
+                    </div>
+                    <div class="assumption-box">
+                        <strong>Phase 3 (Months 13-24):</strong> Federated Control Plane - CSPM, SIEM, SOAR, Advanced Analytics
+                        <br><strong>Expected Benefits:</strong> 55% incident reduction, advanced automation
+                    </div>
+                    <div class="assumption-box">
+                        <strong>Phase 4 (Months 25-36):</strong> Optimization & Advanced Use Cases - ML/AI, Zero Trust Network, Microsegmentation
+                        <br><strong>Expected Benefits:</strong> 65% incident reduction, full automation maturity
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scenarios Tab -->
+        <div id="scenarios" class="tab-content">
+            <div class="section">
+                <h2>🎯 Scenario Analysis</h2>
+                <div class="input-group">
+                    <div class="input-field">
+                        <label>Scenario Type</label>
+                        <select id="scenarioType" onchange="runScenario()">
+                            <option value="conservative">Conservative (50% of expected benefits)</option>
+                            <option value="realistic" selected>Realistic (Expected benefits)</option>
+                            <option value="optimistic">Optimistic (125% of expected benefits)</option>
+                            <option value="pessimistic">Pessimistic (30% of expected benefits)</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <table id="scenarioTable">
+                    <thead>
+                        <tr>
+                            <th>Scenario</th>
+                            <th>Total Investment</th>
+                            <th>Total Benefits</th>
+                            <th>Net Benefit</th>
+                            <th>ROI %</th>
+                            <th>Payback (Months)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="scenarioBody"></tbody>
+                </table>
+            </div>
+
+            <div class="section">
+                <h2>⚠️ Sensitivity Analysis</h2>
+                <div class="chart-container">
+                    <canvas id="sensitivityChart"></canvas>
+                </div>
+                <div class="assumption-box">
+                    <strong>Key Sensitivity Factors:</strong>
+                    <ul>
+                        <li>Incident frequency changes: ±20% impact on ROI</li>
+                        <li>Tool pricing variations: ±15% impact on TCO</li>
+                        <li>Implementation timeline: ±6 months affects payback period</li>
+                        <li>Automation success rate: ±25% impact on operational savings</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Automation Tab -->
+        <div id="automation" class="tab-content">
+            <div class="section">
+                <h2>🤖 Automation Impact Analysis</h2>
+                <div class="input-group">
+                    <div class="input-field">
+                        <label>Current Hours per Incident Response</label>
+                        <input type="number" id="hoursPerIncident" value="16" onchange="calculateAll()">
+                    </div>
+                    <div class="input-field">
+                        <label>Automation Time Reduction (%)</label>
+                        <input type="number" id="automationTimeReduction" value="75" min="0" max="100" onchange="calculateAll()">
+                    </div>
+                    <div class="input-field">
+                        <label>Current Compliance Hours/Month</label>
+                        <input type="number" id="complianceHours" value="160" onchange="calculateAll()">
+                    </div>
+                    <div class="input-field">
+                        <label>Automation Success Rate (%)</label>
+                        <input type="number" id="automationSuccessRate" value="85" min="0" max="100" onchange="calculateAll()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>📊 Automation Savings</h2>
+                <table id="automationTable">
+                    <thead>
+                        <tr>
+                            <th>Automation Area</th>
+                            <th>Year 1 Savings</th>
+                            <th>Year 2 Savings</th>
+                            <th>Year 3 Savings</th>
+                            <th>Total Savings</th>
+                        </tr>
+                    </thead>
+                    <tbody id="automationBody"></tbody>
+                </table>
+            </div>
+
+            <div class="section">
+                <h2>📈 Automation Efficiency Gains</h2>
+                <div class="chart-container">
+                    <canvas id="automationChart"></canvas>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🔧 Automation Blueprint Examples</h2>
+                <div class="assumption-box">
+                    <strong>Blueprint 1: Auto-Remediation Function</strong>
+                    <p>A Lambda/Function that, upon a security alert (e.g., public S3 bucket), automatically applies a restrictive policy and notifies the asset owner.</p>
+                    <pre>
+// Example AWS Lambda for S3 Bucket Remediation
+exports.handler = async (event) => {
+    const s3 = new AWS.S3();
+    const bucketName = event.detail.requestParameters.bucketName;
+    
+    // Apply bucket policy to make private
+    await s3.putBucketPolicy({
+        Bucket: bucketName,
+        Policy: JSON.stringify({
+            Version: "2012-10-17",
+            Statement: [{
+                Effect: "Deny",
+                Principal: "*",
+                Action: "s3:*",
+                Resource: [
+                    `arn:aws:s3:::${bucketName}`,
+                    `arn:aws:s3:::${bucketName}/*`
+                ],
+                Condition: {
+                    Bool: { "aws:SecureTransport": false }
+                }
+            }]
+        })
+    }).promise();
+    
+    // Notify owner via SNS
+    await sns.publish({
+        TopicArn: process.env.ALERT_TOPIC,
+        Message: `Public bucket ${bucketName} was automatically secured`
+    }).promise();
+};</pre>
+                </div>
+
+                <div class="assumption-box">
+                    <strong>Blueprint 2: Asset Onboarding Workflow</strong>
+                    <p>An IaC pipeline that enforces mandatory tagging and security agent installation before a VM can be deployed.</p>
+                    <pre>
+# Example Terraform for Azure VM with Mandatory Controls
+resource "azurerm_virtual_machine" "secure_vm" {
+  name                  = "zt-${var.app_name}-vm"
+  location              = azurerm_resource_group.main.location
+  resource_group_name   = azurerm_resource_group.main.name
+  vm_size               = "Standard_DS2_v2"
+  
+  # Required Tags
+  tags = {
+    "Owner"       = var.owner_email
+    "CostCenter"  = var.cost_center
+    "Environment" = var.environment
+    "Compliance"  = "ZeroTrust"
+  }
+
+  # Security Baseline Configuration
+  os_profile_windows_config {
+    provision_vm_agent = true
+    enable_automatic_upgrades = true
+    
+    # Install Defender extension
+    additional_unattend_config {
+      pass         = "oobeSystem"
+      component    = "Microsoft-Windows-Shell-Setup"
+      setting_name = "FirstLogonCommands"
+      content      = file("${path.module}/scripts/install_defender.xml")
+    }
+  }
+
+  # Block creation if tags are missing
+  lifecycle {
+    precondition {
+      condition     = can(regex("^.+@.+\\..+$", var.owner_email))
+      error_message = "Valid owner email is required"
+    }
+  }
+}</pre>
+                </div>
+            </div>
+        </div>
+
+        <div class="results" id="results">
+            <div class="section">
+                <h2>🏆 Executive Summary</h2>
+                <div id="executiveSummary"></div>
+            </div>
+        </div>
+
+        <div class="disclaimer">
+            <strong>Disclaimer:</strong> This financial model is based on industry benchmarks, vendor pricing as of July 2025, and assumed organizational parameters. Actual costs and benefits may vary based on specific implementation details, contract negotiations, and organizational factors. This calculator should be used as a starting point for financial planning and business case development.
+        </div>
+    </div>
+
+    <script>
+        // Global variables for calculations
+        let calculations = {
+            capex: {},
+            opex: {},
+            benefits: {},
+            automation: {},
+            cashflow: [],
+            charts: {}
+        };
+
+        // Pricing data based on current market research
+        const pricingData = {
+            aws: {
+                identityCenter: { perUser: 2.5, setup: 15000 },
+                guardDuty: { perAccount: 350, perGB: 1.25 },
+                securityHub: { perAccount: 125, perFinding: 0.0025 },
+                config: { perRule: 2.5, perEvaluation: 0.003 },
+                cloudTrail: { perEvent: 0.10, storage: 0.025 },
+                inspector: { perAssessment: 0.30 },
+                networkFirewall: { perHour: 0.395, perGB: 0.065 }
+            },
+            azure: {
+                azureAD: { perUser: 3.0, premium: 6.0 },
+                defender: { perVM: 15, perServer: 22 },
+                sentinel: { perGB: 2.76, retention: 0.12 },
+                policy: { perAssignment: 0.50 },
+                monitor: { perGB: 2.30, alerts: 0.10 },
+                firewall: { perHour: 0.395, perGB: 0.065 }
+            },
+            thirdParty: {
+                prismaCloud: { perWorkload: 18, enterprise: 25 },
+                splunk: { perGB: 95, enterprise: 125 },
+                crowdStrike: { perEndpoint: 8.99 },
+                okta: { perUser: 12, enterprise: 18 },
+                cyberArk: { perUser: 35, privilegedAccess: 85 },
+                tines: { perUser: 10000, base: 50000 } // SOAR platform
+            }
+        };
+
+        // Initialize the calculator
+        document.addEventListener('DOMContentLoaded', function() {
+            updateSplit();
+            calculateAll();
+        });
+
+        function updateSplit() {
+            const split = document.getElementById('cloudSplit').value;
+            document.getElementById('awsPercent').textContent = split;
+            document.getElementById('azurePercent').textContent = 100 - split;
+        }
+
+        function showTab(tabName) {
+            // Hide all tab contents
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => content.classList.remove('active'));
+            
+            // Remove active class from all tabs
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Show selected tab content
+            document.getElementById(tabName).classList.add('active');
+            
+            // Add active class to selected tab
+            event.target.classList.add('active');
+            
+            // Render charts when their tab is shown
+            if (tabName === 'costs' && calculations.charts.costBreakdown) {
+                calculations.charts.costBreakdown.update();
+            }
+            if (tabName === 'benefits' && calculations.charts.riskChart) {
+                calculations.charts.riskChart.update();
+            }
+            if (tabName === 'timeline' && calculations.charts.timelineChart) {
+                calculations.charts.timelineChart.update();
+            }
+            if (tabName === 'scenarios' && calculations.charts.sensitivityChart) {
+                calculations.charts.sensitivityChart.update();
+            }
+            if (tabName === 'automation' && calculations.charts.automationChart) {
+                calculations.charts.automationChart.update();
+            }
+        }
+
+        function calculateAll() {
+            calculateCapex();
+            calculateOpex();
+            calculateBenefits();
+            calculateAutomationImpact();
+            calculateCashflow();
+            updateTables();
+            renderCharts();
+            runScenario();
+        }
+
+        function calculateCapex() {
+            const employees = parseInt(document.getElementById('employees').value);
+            const workloads = parseInt(document.getElementById('workloads').value);
+            const awsSplit = parseInt(document.getElementById('cloudSplit').value) / 100;
+            const azureSplit = 1 - awsSplit;
+
+            const awsWorkloads = Math.round(workloads * awsSplit);
+            const azureWorkloads = Math.round(workloads * azureSplit);
+
+            calculations.capex = {
+                // AWS Services
+                awsIdentityCenter: {
+                    name: "AWS IAM Identity Center",
+                    vendor: "AWS",
+                    year1: employees * pricingData.aws.identityCenter.perUser * 12 + pricingData.aws.identityCenter.setup,
+                    year2: employees * pricingData.aws.identityCenter.perUser * 12,
+                    year3: employees * pricingData.aws.identityCenter.perUser * 12
+                },
+                awsGuardDuty: {
+                    name: "AWS GuardDuty",
+                    vendor: "AWS",
+                    year1: awsWorkloads * pricingData.aws.guardDuty.perAccount * 12,
+                    year2: awsWorkloads * pricingData.aws.guardDuty.perAccount * 12,
+                    year3: awsWorkloads * pricingData.aws.guardDuty.perAccount * 12
+                },
+                awsSecurityHub: {
+                    name: "AWS Security Hub",
+                    vendor: "AWS",
+                    year1: awsWorkloads * pricingData.aws.securityHub.perAccount * 12,
+                    year2: awsWorkloads * pricingData.aws.securityHub.perAccount * 12,
+                    year3: awsWorkloads * pricingData.aws.securityHub.perAccount * 12
+                },
+                awsNetworkFirewall: {
+                    name: "AWS Network Firewall",
+                    vendor: "AWS",
+                    year1: awsWorkloads * pricingData.aws.networkFirewall.perHour * 24 * 365 * 0.5, // 50% utilization
+                    year2: awsWorkloads * pricingData.aws.networkFirewall.perHour * 24 * 365 * 0.6,
+                    year3: awsWorkloads * pricingData.aws.networkFirewall.perHour * 24 * 365 * 0.7
+                },
+                // Azure Services
+                azureAD: {
+                    name: "Azure Active Directory Premium",
+                    vendor: "Microsoft Azure",
+                    year1: employees * pricingData.azure.azureAD.premium * 12,
+                    year2: employees * pricingData.azure.azureAD.premium * 12,
+                    year3: employees * pricingData.azure.azureAD.premium * 12
+                },
+                defenderCloud: {
+                    name: "Microsoft Defender for Cloud",
+                    vendor: "Microsoft Azure",
+                    year1: azureWorkloads * pricingData.azure.defender.perVM * 12,
+                    year2: azureWorkloads * pricingData.azure.defender.perVM * 12,
+                    year3: azureWorkloads * pricingData.azure.defender.perVM * 12
+                },
+                sentinel: {
+                    name: "Microsoft Sentinel",
+                    vendor: "Microsoft Azure",
+                    year1: 500 * pricingData.azure.sentinel.perGB * 12, // Estimated 500GB/month
+                    year2: 650 * pricingData.azure.sentinel.perGB * 12,
+                    year3: 800 * pricingData.azure.sentinel.perGB * 12
+                },
+                azureFirewall: {
+                    name: "Azure Firewall",
+                    vendor: "Microsoft Azure",
+                    year1: azureWorkloads * pricingData.azure.firewall.perHour * 24 * 365 * 0.5,
+                    year2: azureWorkloads * pricingData.azure.firewall.perHour * 24 * 365 * 0.6,
+                    year3: azureWorkloads * pricingData.azure.firewall.perHour * 24 * 365 * 0.7
+                },
+                // Third-party CSPM
+                prismaCloud: {
+                    name: "Prisma Cloud CSPM",
+                    vendor: "Palo Alto Networks",
+                    year1: workloads * pricingData.thirdParty.prismaCloud.enterprise * 12,
+                    year2: workloads * pricingData.thirdParty.prismaCloud.enterprise * 12,
+                    year3: workloads * pricingData.thirdParty.prismaCloud.enterprise * 12
+                },
+                // SIEM
+                splunk: {
+                    name: "Splunk Enterprise Security",
+                    vendor: "Splunk",
+                    year1: 200 * pricingData.thirdParty.splunk.perGB * 12 + 50000, // Setup costs
+                    year2: 275 * pricingData.thirdParty.splunk.perGB * 12,
+                    year3: 350 * pricingData.thirdParty.splunk.perGB * 12
+                },
+                // Endpoint Protection
+                crowdStrike: {
+                    name: "CrowdStrike Falcon",
+                    vendor: "CrowdStrike",
+                    year1: employees * pricingData.thirdParty.crowdStrike.perEndpoint * 12,
+                    year2: employees * pricingData.thirdParty.crowdStrike.perEndpoint * 12,
+                    year3: employees * pricingData.thirdParty.crowdStrike.perEndpoint * 12
+                },
+                // SOAR Platform
+                tines: {
+                    name: "Tines SOAR Platform",
+                    vendor: "Tines",
+                    year1: pricingData.thirdParty.tines.base + (employees * 0.1 * pricingData.thirdParty.tines.perUser), // 10% of employees as security users
+                    year2: employees * 0.1 * pricingData.thirdParty.tines.perUser,
+                    year3: employees * 0.1 * pricingData.thirdParty.tines.perUser
+                },
+                // Federated IAM
+                okta: {
+                    name: "Okta Identity Cloud",
+                    vendor: "Okta",
+                    year1: employees * pricingData.thirdParty.okta.enterprise * 12,
+                    year2: employees * pricingData.thirdParty.okta.enterprise * 12,
+                    year3: employees * pricingData.thirdParty.okta.enterprise * 12
+                }
+            };
+        }
+
+        function calculateOpex() {
+            const employees = parseInt(document.getElementById('employees').value);
+            const securityTeam = parseInt(document.getElementById('securityTeam').value);
+            const avgSalary = parseInt(document.getElementById('avgSalary').value);
+            const totalCapexYear1 = getTotalCapexYear(1);
+            const totalCapexYear2 = getTotalCapexYear(2);
+            const totalCapexYear3 = getTotalCapexYear(3);
+
+            calculations.opex = {
+                // Personnel costs
+                trainingCosts: {
+                    name: "Security Team Training & Certification",
+                    type: "Personnel",
+                    year1: securityTeam * 8000, // $8k per person for initial training
+                    year2: securityTeam * 3000, // Ongoing training
+                    year3: securityTeam * 3500
+                },
+                consultingServices: {
+                    name: "Implementation & Consulting Services",
+                    type: "Professional Services",
+                    year1: 450000, // Heavy implementation support
+                    year2: 180000, // Ongoing optimization
+                    year3: 120000  // Minimal consulting
+                },
+                // Additional headcount
+                additionalStaff: {
+                    name: "Additional Security Engineers (2 FTE)",
+                    type: "Personnel",
+                    year1: 2 * avgSalary * 1.35, // Including benefits
+                    year2: 2 * avgSalary * 1.35,
+                    year3: 2 * avgSalary * 1.35
+                },
+                // Support and maintenance
+                supportContracts: {
+                    name: "Vendor Support Contracts (20% of licenses)",
+                    type: "Support",
+                    year1: totalCapexYear1 * 0.20,
+                    year2: totalCapexYear2 * 0.20,
+                    year3: totalCapexYear3 * 0.20
+                },
+                // Infrastructure costs
+                cloudInfrastructure: {
+                    name: "Additional Cloud Infrastructure",
+                    type: "Infrastructure",
+                    year1: 125000,
+                    year2: 165000,
+                    year3: 185000
+                },
+                // Proof of Concept Costs
+                pocCosts: {
+                    name: "Proof of Concept Implementation",
+                    type: "Project",
+                    year1: 225000,
+                    year2: 75000,
+                    year3: 50000
+                }
+            };
+        }
+
+        function getTotalCapexYear(year) {
+            let total = 0;
+            for (const key in calculations.capex) {
+                total += calculations.capex[key][`year${year}`] || 0;
+            }
+            return total;
+        }
+
+        function calculateBenefits() {
+            const currentIncidents = parseInt(document.getElementById('currentIncidents').value);
+            const incidentCost = parseInt(document.getElementById('incidentCost').value);
+            const incidentReduction = parseInt(document.getElementById('incidentReduction').value) / 100;
+            const manualHours = parseInt(document.getElementById('manualHours').value);
+            const automationGain = parseInt(document.getElementById('automationGain').value) / 100;
+            const avgSalary = parseInt(document.getElementById('avgSalary').value);
+            const complianceReduction = parseInt(document.getElementById('complianceReduction').value) / 100;
+            const currentALE = parseInt(document.getElementById('aleBefore').value);
+            const futureALE = parseInt(document.getElementById('aleAfter').value);
+            const breachAvoidance = parseInt(document.getElementById('breachAvoidance').value) / 100;
+            const majorBreachCost = parseInt(document.getElementById('majorBreachCost').value);
+
+            // Risk reduction benefits (ALE reduction)
+            const riskReduction = currentALE - futureALE;
+
+            // Operational efficiency benefits
+            const hourlyRate = (avgSalary * 1.35) / 2080; // Including benefits, per hour
+            const automationSavings = manualHours * 52 * hourlyRate * automationGain;
+
+            // Compliance cost reduction
+            const currentComplianceCost = 850000; // Estimated annual compliance cost
+            const complianceSavings = currentComplianceCost * complianceReduction;
+
+            calculations.benefits = {
+                riskReduction: {
+                    name: "Risk Reduction (ALE Improvement)",
+                    year1: riskReduction * 0.25, // Gradual implementation
+                    year2: riskReduction * 0.75,
+                    year3: riskReduction,
+                    category: "Risk"
+                },
+                operationalEfficiency: {
+                    name: "Operational Efficiency (Automation)",
+                    year1: automationSavings * 0.35,
+                    year2: automationSavings * 0.70,
+                    year3: automationSavings,
+                    category: "Operations"
+                },
+                complianceEfficiency: {
+                    name: "Compliance Cost Reduction",
+                    year1: complianceSavings * 0.20,
+                    year2: complianceSavings * 0.45,
+                    year3: complianceSavings,
+                    category: "Compliance"
+                },
+                avoidedBreachCost: {
+                    name: "Major Breach Avoidance (Risk Premium)",
+                    year1: 0,
+                    year2: majorBreachCost * breachAvoidance,
+                    year3: 0,
+                    category: "Risk"
+                },
+                productivityGains: {
+                    name: "Developer Productivity Improvements",
+                    year1: 285000,
+                    year2: 485000,
+                    year3: 625000,
+                    category: "Productivity"
+                }
+            };
+        }
+
+        function calculateAutomationImpact() {
+            const currentIncidents = parseInt(document.getElementById('currentIncidents').value);
+            const incidentReduction = parseInt(document.getElementById('incidentReduction').value) / 100;
+            const hoursPerIncident = parseInt(document.getElementById('hoursPerIncident').value);
+            const automationTimeReduction = parseInt(document.getElementById('automationTimeReduction').value) / 100;
+            const complianceHours = parseInt(document.getElementById('complianceHours').value);
+            const complianceReduction = parseInt(document.getElementById('complianceReduction').value) / 100;
+            const automationSuccessRate = parseInt(document.getElementById('automationSuccessRate').value) / 100;
+            const avgSalary = parseInt(document.getElementById('avgSalary').value);
+            const hourlyRate = (avgSalary * 1.35) / 2080; // Including benefits, per hour
+
+            // Incident response automation savings
+            const incidentsReduced = currentIncidents * incidentReduction;
+            const timeSavedPerIncident = hoursPerIncident * automationTimeReduction;
+            const incidentResponseSavings = incidentsReduced * timeSavedPerIncident * hourlyRate * automationSuccessRate;
+
+            // Compliance automation savings
+            const complianceSavings = complianceHours * 12 * complianceReduction * hourlyRate * automationSuccessRate;
+
+            calculations.automation = {
+                incidentResponse: {
+                    name: "Incident Response Automation",
+                    year1: incidentResponseSavings * 0.35,
+                    year2: incidentResponseSavings * 0.75,
+                    year3: incidentResponseSavings,
+                    category: "Security"
+                },
+                complianceAutomation: {
+                    name: "Compliance Automation",
+                    year1: complianceSavings * 0.25,
+                    year2: complianceSavings * 0.60,
+                    year3: complianceSavings,
+                    category: "Compliance"
+                },
+                provisioningAutomation: {
+                    name: "Provisioning Automation",
+                    year1: 125000,
+                    year2: 185000,
+                    year3: 225000,
+                    category: "Operations"
+                }
+            };
+        }
+
+        function calculateCashflow() {
+            calculations.cashflow = [];
+            let cumulativeCashFlow = 0;
+
+            for (let year = 1; year <= 3; year++) {
+                const capex = getTotalCapexYear(year);
+                const opex = getTotalOpexYear(year);
+                const benefits = getTotalBenefitsYear(year);
+                const netCashFlow = benefits - capex - opex;
+                cumulativeCashFlow += netCashFlow;
+
+                calculations.cashflow.push({
+                    period: `Year ${year}`,
+                    initialInvestment: capex,
+                    ongoingCosts: opex,
+                    benefitsRealized: benefits,
+                    netCashFlow: netCashFlow,
+                    cumulativeCashFlow: cumulativeCashFlow
+                });
+            }
+        }
+
+        function getTotalOpexYear(year) {
+            let total = 0;
+            for (const key in calculations.opex) {
+                total += calculations.opex[key][`year${year}`] || 0;
+            }
+            return total;
+        }
+
+        function getTotalBenefitsYear(year) {
+            let total = 0;
+            for (const key in calculations.benefits) {
+                total += calculations.benefits[key][`year${year}`] || 0;
+            }
+            return total;
+        }
+
+        function getTotalAutomationYear(year) {
+            let total = 0;
+            for (const key in calculations.automation) {
+                total += calculations.automation[key][`year${year}`] || 0;
+            }
+            return total;
+        }
+
+        function updateTables() {
+            updateCapexTable();
+            updateOpexTable();
+            updateBenefitsTable();
+            updateAutomationTable();
+            updateCashflowTable();
+            updateScenarioTable();
+            updateMetrics();
+            updateExecutiveSummary();
+        }
+
+        function updateCapexTable() {
+            const tbody = document.getElementById('capexBody');
+            tbody.innerHTML = '';
+
+            for (const key in calculations.capex) {
+                const item = calculations.capex[key];
+                const total = item.year1 + item.year2 + item.year3;
+                
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${item.name}</td>
+                    <td>${item.vendor}</td>
+                    <td>$${item.year1.toLocaleString()}</td>
+                    <td>$${item.year2.toLocaleString()}</td>
+                    <td>$${item.year3.toLocaleString()}</td>
+                    <td><strong>$${total.toLocaleString()}</strong></td>
+                `;
+            }
+        }
+
+        function updateOpexTable() {
+            const tbody = document.getElementById('opexBody');
+            tbody.innerHTML = '';
+
+            for (const key in calculations.opex) {
+                const item = calculations.opex[key];
+                const total = item.year1 + item.year2 + item.year3;
+                
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${item.name}</td>
+                    <td>${item.type}</td>
+                    <td>$${item.year1.toLocaleString()}</td>
+                    <td>$${item.year2.toLocaleString()}</td>
+                    <td>$${item.year3.toLocaleString()}</td>
+                    <td><strong>$${total.toLocaleString()}</strong></td>
+                `;
+            }
+        }
+
+        function updateBenefitsTable() {
+            const tbody = document.getElementById('benefitsBody');
+            tbody.innerHTML = '';
+
+            for (const key in calculations.benefits) {
+                const item = calculations.benefits[key];
+                const total = item.year1 + item.year2 + item.year3;
+                const npv = calculateNPV([item.year1, item.year2, item.year3], 0.10);
+                
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${item.name}</td>
+                    <td class="positive">$${item.year1.toLocaleString()}</td>
+                    <td class="positive">$${item.year2.toLocaleString()}</td>
+                    <td class="positive">$${item.year3.toLocaleString()}</td>
+                    <td class="positive"><strong>$${total.toLocaleString()}</strong></td>
+                    <td class="positive"><strong>$${npv.toLocaleString()}</strong></td>
+                `;
+            }
+        }
+
+        function updateAutomationTable() {
+            const tbody = document.getElementById('automationBody');
+            tbody.innerHTML = '';
+
+            for (const key in calculations.automation) {
+                const item = calculations.automation[key];
+                const total = item.year1 + item.year2 + item.year3;
+                
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${item.name}</td>
+                    <td class="positive">$${item.year1.toLocaleString()}</td>
+                    <td class="positive">$${item.year2.toLocaleString()}</td>
+                    <td class="positive">$${item.year3.toLocaleString()}</td>
+                    <td class="positive"><strong>$${total.toLocaleString()}</strong></td>
+                `;
+            }
+        }
+
+        function updateCashflowTable() {
+            const tbody = document.getElementById('cashflowBody');
+            tbody.innerHTML = '';
+
+            calculations.cashflow.forEach(item => {
+                const row = tbody.insertRow();
+                const netClass = item.netCashFlow >= 0 ? 'positive' : 'negative';
+                const cumClass = item.cumulativeCashFlow >= 0 ? 'positive' : 'negative';
+                
+                row.innerHTML = `
+                    <td>${item.period}</td>
+                    <td class="negative">$${item.initialInvestment.toLocaleString()}</td>
+                    <td class="negative">$${item.ongoingCosts.toLocaleString()}</td>
+                    <td class="positive">$${item.benefitsRealized.toLocaleString()}</td>
+                    <td class="${netClass}"><strong>$${item.netCashFlow.toLocaleString()}</strong></td>
+                    <td class="${cumClass}"><strong>$${item.cumulativeCashFlow.toLocaleString()}</strong></td>
+                `;
+            });
+        }
+
+        function updateScenarioTable() {
+            const tbody = document.getElementById('scenarioBody');
+            tbody.innerHTML = '';
+
+            const scenarios = [
+                { name: "Pessimistic", multiplier: 0.3 },
+                { name: "Conservative", multiplier: 0.5 },
+                { name: "Realistic", multiplier: 1.0 },
+                { name: "Optimistic", multiplier: 1.25 }
+            ];
+
+            scenarios.forEach(scenario => {
+                const totalCapex = getTotalCapexYear(1) + getTotalCapexYear(2) + getTotalCapexYear(3);
+                const totalOpex = getTotalOpexYear(1) + getTotalOpexYear(2) + getTotalOpexYear(3);
+                const totalTco = totalCapex + totalOpex;
+                const totalBenefits = (getTotalBenefitsYear(1) + getTotalBenefitsYear(2) + getTotalBenefitsYear(3)) * scenario.multiplier;
+                const netBenefit = totalBenefits - totalTco;
+                const roiPercentage = ((totalBenefits - totalTco) / totalTco) * 100;
+                
+                // Calculate payback period for scenario
+                let paybackPeriod = 0;
+                let cumulativeNet = 0;
+                for (let i = 0; i < calculations.cashflow.length; i++) {
+                    const yearMultiplier = i === 1 ? scenario.multiplier * 0.75 : 
+                                         i === 2 ? scenario.multiplier : scenario.multiplier * 0.25;
+                    cumulativeNet += (calculations.cashflow[i].benefitsRealized * yearMultiplier) - 
+                                    calculations.cashflow[i].initialInvestment - 
+                                    calculations.cashflow[i].ongoingCosts;
+                    if (cumulativeNet >= 0) {
+                        paybackPeriod = (i + 1) * 12; // Convert to months
+                        break;
+                    }
+                }
+                if (paybackPeriod === 0) paybackPeriod = 36; // If not paid back in 3 years
+
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${scenario.name}</td>
+                    <td>$${totalTco.toLocaleString()}</td>
+                    <td>$${totalBenefits.toLocaleString()}</td>
+                    <td class="${netBenefit >= 0 ? 'positive' : 'negative'}">$${netBenefit.toLocaleString()}</td>
+                    <td class="${roiPercentage >= 0 ? 'positive' : 'negative'}">${roiPercentage.toFixed(1)}%</td>
+                    <td>${paybackPeriod.toFixed(1)}</td>
+                `;
+            });
+        }
+
+        function calculateNPV(cashflows, discountRate) {
+            let npv = 0;
+            for (let i = 0; i < cashflows.length; i++) {
+                npv += cashflows[i] / Math.pow(1 + discountRate, i + 1);
+            }
+            return npv;
+        }
+
+        function updateMetrics() {
+            const totalCapex = getTotalCapexYear(1) + getTotalCapexYear(2) + getTotalCapexYear(3);
+            const totalOpex = getTotalOpexYear(1) + getTotalOpexYear(2) + getTotalOpexYear(3);
+            const totalTco = totalCapex + totalOpex;
+            const totalBenefits = getTotalBenefitsYear(1) + getTotalBenefitsYear(2) + getTotalBenefitsYear(3);
+            const netBenefit = totalBenefits - totalTco;
+            const roiPercentage = ((totalBenefits - totalTco) / totalTco) * 100;
+
+            // Calculate payback period
+            let paybackPeriod = 0;
+            let cumulativeNet = 0;
+            for (let i = 0; i < calculations.cashflow.length; i++) {
+                cumulativeNet += calculations.cashflow[i].netCashFlow;
+                if (cumulativeNet >= 0) {
+                    paybackPeriod = (i + 1) * 12; // Convert to months
+                    break;
+                }
+            }
+            if (paybackPeriod === 0) paybackPeriod = 36; // If not paid back in 3 years
+
+            document.getElementById('totalCapex').textContent = `$${totalCapex.toLocaleString()}`;
+            document.getElementById('totalOpex').textContent = `$${totalOpex.toLocaleString()}`;
+            document.getElementById('totalTco').textContent = `$${totalTco.toLocaleString()}`;
+            document.getElementById('totalBenefits').textContent = `$${totalBenefits.toLocaleString()}`;
+            document.getElementById('netBenefit').textContent = `$${netBenefit.toLocaleString()}`;
+            document.getElementById('roiPercentage').textContent = `${roiPercentage.toFixed(1)}%`;
+            document.getElementById('paybackPeriod').textContent = `${paybackPeriod.toFixed(1)}`;
+
+            // Update ROI indicator
+            const roiIndicator = document.getElementById('roiIndicator');
+            if (roiPercentage >= 200) {
+                roiIndicator.textContent = 'Excellent ROI - Strong Business Case';
+                roiIndicator.className = 'roi-indicator roi-excellent';
+            } else if (roiPercentage >= 100) {
+                roiIndicator.textContent = 'Good ROI - Solid Investment';
+                roiIndicator.className = 'roi-indicator roi-good';
+            } else {
+                roiIndicator.textContent = 'Poor ROI - Requires Optimization';
+                roiIndicator.className = 'roi-indicator roi-poor';
+            }
+
+            document.getElementById('results').style.display = 'block';
+        }
+
+        function updateExecutiveSummary() {
+            const totalCapex = getTotalCapexYear(1) + getTotalCapexYear(2) + getTotalCapexYear(3);
+            const totalOpex = getTotalOpexYear(1) + getTotalOpexYear(2) + getTotalOpexYear(3);
+            const totalTco = totalCapex + totalOpex;
+            const totalBenefits = getTotalBenefitsYear(1) + getTotalBenefitsYear(2) + getTotalBenefitsYear(3);
+            const netBenefit = totalBenefits - totalTco;
+            const roiPercentage = ((totalBenefits - totalTco) / totalTco) * 100;
+            const paybackYears = parseInt(document.getElementById('paybackPeriod').textContent) / 12;
+
+            document.getElementById('executiveSummary').innerHTML = `
+                <div class="assumption-box">
+                    <h3>💼 Business Case Summary</h3>
+                    <p><strong>Investment Required:</strong> $${totalTco.toLocaleString()} over 3 years</p>
+                    <p><strong>Expected Benefits:</strong> $${totalBenefits.toLocaleString()} over 3 years</p>
+                    <p><strong>Net Benefit:</strong> $${netBenefit.toLocaleString()}</p>
+                    <p><strong>ROI:</strong> ${roiPercentage.toFixed(1)}%</p>
+                    <p><strong>Payback Period:</strong> ${paybackYears.toFixed(1)} years</p>
+                    
+                    <h4>🔑 Key Value Drivers:</h4>
+                    <ul>
+                        <li>Risk reduction through ${document.getElementById('incidentReduction').value}% decrease in security incidents</li>
+                        <li>Operational efficiency gains from ${document.getElementById('automationGain').value}% automation of manual tasks</li>
+                        <li>Compliance cost reduction of ${document.getElementById('complianceReduction').value}%</li>
+                        <li>Avoidance of major breach costs estimated at $${document.getElementById('majorBreachCost').value.toLocaleString()}</li>
+                        <li>Automation savings of $${getTotalAutomationYear(3).toLocaleString()} annually by Year 3</li>
+                    </ul>
+                    
+                    <h4>📌 Recommendation:</h4>
+                    <p>Based on the financial analysis, this Zero Trust implementation ${roiPercentage >= 100 ? 
+                        'presents a strong business case with positive ROI expected within ' + paybackYears.toFixed(1) + ' years.' : 
+                        'requires further optimization to achieve acceptable ROI. Consider focusing on high-impact, low-cost initiatives first.'}</p>
+                </div>
+            `;
+        }
+
+        function runScenario() {
+            updateScenarioTable();
+        }
+
+        function renderCharts() {
+            // Destroy existing charts if they exist
+            if (calculations.charts.costBreakdown) calculations.charts.costBreakdown.destroy();
+            if (calculations.charts.riskChart) calculations.charts.riskChart.destroy();
+            if (calculations.charts.timelineChart) calculations.charts.timelineChart.destroy();
+            if (calculations.charts.sensitivityChart) calculations.charts.sensitivityChart.destroy();
+            if (calculations.charts.automationChart) calculations.charts.automationChart.destroy();
+
+            // Cost Breakdown Chart
+            const costBreakdownCtx = document.getElementById('costBreakdownChart').getContext('2d');
+            calculations.charts.costBreakdown = new Chart(costBreakdownCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Year 1', 'Year 2', 'Year 3'],
+                    datasets: [
+                        {
+                            label: 'CapEx',
+                            data: [getTotalCapexYear(1), getTotalCapexYear(2), getTotalCapexYear(3)],
+                            backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'OpEx',
+                            data: [getTotalOpexYear(1), getTotalOpexYear(2), getTotalOpexYear(3)],
+                            backgroundColor: 'rgba(255, 99, 132, 0.7)',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Cost (USD)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Yearly Cost Breakdown (CapEx vs OpEx)'
+                        }
+                    }
+                }
+            });
+
+            // Risk Chart
+            const riskCtx = document.getElementById('riskChart').getContext('2d');
+            calculations.charts.riskChart = new Chart(riskCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Current ALE', 'Post-Implementation ALE', 'Risk Reduction'],
+                    datasets: [{
+                        data: [
+                            parseInt(document.getElementById('aleBefore').value),
+                            parseInt(document.getElementById('aleAfter').value),
+                            parseInt(document.getElementById('aleBefore').value) - parseInt(document.getElementById('aleAfter').value)
+                        ],
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.7)',
+                            'rgba(75, 192, 192, 0.7)',
+                            'rgba(54, 162, 235, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(54, 162, 235, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Annualized Loss Expectancy (ALE) Reduction'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.label}: $${context.raw.toLocaleString()}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Timeline Chart
+            const timelineCtx = document.getElementById('timelineChart').getContext('2d');
+            calculations.charts.timelineChart = new Chart(timelineCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Year 1', 'Year 2', 'Year 3'],
+                    datasets: [
+                        {
+                            label: 'Cumulative Costs',
+                            data: [
+                                getTotalCapexYear(1) + getTotalOpexYear(1),
+                                getTotalCapexYear(1) + getTotalCapexYear(2) + getTotalOpexYear(1) + getTotalOpexYear(2),
+                                getTotalCapexYear(1) + getTotalCapexYear(2) + getTotalCapexYear(3) + 
+                                getTotalOpexYear(1) + getTotalOpexYear(2) + getTotalOpexYear(3)
+                            ],
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            borderWidth: 2,
+                            tension: 0.1,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'Cumulative Benefits',
+                            data: [
+                                getTotalBenefitsYear(1),
+                                getTotalBenefitsYear(1) + getTotalBenefitsYear(2),
+                                getTotalBenefitsYear(1) + getTotalBenefitsYear(2) + getTotalBenefitsYear(3)
+                            ],
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 2,
+                            tension: 0.1,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'Net Cash Flow',
+                            data: [
+                                calculations.cashflow[0].netCashFlow,
+                                calculations.cashflow[0].netCashFlow + calculations.cashflow[1].netCashFlow,
+                                calculations.cashflow[0].netCashFlow + calculations.cashflow[1].netCashFlow + calculations.cashflow[2].netCashFlow
+                            ],
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 2,
+                            tension: 0.1,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'Costs/Benefits (USD)'
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            grid: {
+                                drawOnChartArea: false
+                            },
+                            title: {
+                                display: true,
+                                text: 'Net Cash Flow (USD)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: '3-Year Financial Timeline'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: $${context.raw.toLocaleString()}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Sensitivity Chart
+            const sensitivityCtx = document.getElementById('sensitivityChart').getContext('2d');
+            calculations.charts.sensitivityChart = new Chart(sensitivityCtx, {
+                type: 'radar',
+                data: {
+                    labels: [
+                        'Incident Frequency',
+                        'Tool Pricing',
+                        'Implementation Speed',
+                        'Automation Success',
+                        'Compliance Costs',
+                        'Breach Probability'
+                    ],
+                    datasets: [
+                        {
+                            label: 'Impact on ROI',
+                            data: [20, 15, 10, 25, 15, 30],
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            pointBackgroundColor: 'rgba(255, 99, 132, 1)',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: 'rgba(255, 99, 132, 1)'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: {
+                                display: true
+                            },
+                            suggestedMin: 0,
+                            suggestedMax: 40
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Sensitivity Analysis - Factors Impacting ROI (%)'
+                        }
+                    }
+                }
+            });
+
+            // Automation Chart
+            const automationCtx = document.getElementById('automationChart').getContext('2d');
+            calculations.charts.automationChart = new Chart(automationCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Incident Response', 'Compliance', 'Provisioning'],
+                    datasets: [
+                        {
+                            label: 'Year 1 Savings',
+                            data: [
+                                calculations.automation.incidentResponse.year1,
+                                calculations.automation.complianceAutomation.year1,
+                                calculations.automation.provisioningAutomation.year1
+                            ],
+                            backgroundColor: 'rgba(54, 162, 235, 0.7)'
+                        },
+                        {
+                            label: 'Year 2 Savings',
+                            data: [
+                                calculations.automation.incidentResponse.year2,
+                                calculations.automation.complianceAutomation.year2,
+                                calculations.automation.provisioningAutomation.year2
+                            ],
+                            backgroundColor: 'rgba(75, 192, 192, 0.7)'
+                        },
+                        {
+                            label: 'Year 3 Savings',
+                            data: [
+                                calculations.automation.incidentResponse.year3,
+                                calculations.automation.complianceAutomation.year3,
+                                calculations.automation.provisioningAutomation.year3
+                            ],
+                            backgroundColor: 'rgba(153, 102, 255, 0.7)'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Savings (USD)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Automation Savings by Area'
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
